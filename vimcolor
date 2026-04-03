@@ -64,7 +64,7 @@ if ($ENV{VIMCOLOR_ANSI}) {
 	} else {
 		while (@ADD) {
 			my ($k, $v) = splice @ADD, -2;
-			$attrs{$_} = $reset;
+			$attrs{$k} = $reset;
 			warn "### invalid color name '$v' ###\n" if ! colorvalid($v);;
 			$attrs{$k} = color($v) if colorvalid($v);
 		}
@@ -173,7 +173,7 @@ EOF
 	$data =~ s/\x0D\x0A?/\n/g;
 	$data =~ s/<(.*?)<>\1>//g; # repeating blocks of the same type
 	for (keys %attrs) {
-		$types{$_} = 1 if $data =~ s/>$_>(.*?)<$_</$attrs{$_}$1/g; #coloring
+		$types{$_} = 1 if $data =~ s/>$_>(.*?)<$_</$attrs{$_}$1$reset/g; #coloring
 	}
 	# first line without the reset sequence
 	$types{$1} = 0 if $data =~ s/^>(.*?)>(.*?)<\1</$2/; #no color
@@ -182,6 +182,7 @@ EOF
 	my %s=(l=>'<',g=>'>',a=>'&');
 	$data =~s/&([lga])/$s{$1}/g;
 	$data =~ s/\^\[/\e/g;
+	$data =~ s/\e\[0m\e\[0m/$reset/g;
 	# get start and end of file correct
 	$data .= $reset if $data;
 	print $data if $data;
